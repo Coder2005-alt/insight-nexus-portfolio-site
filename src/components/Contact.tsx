@@ -1,0 +1,191 @@
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Mail, Linkedin, Clock } from 'lucide-react';
+
+const Contact = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach(el => observer.observe(el));
+
+    return () => {
+      revealElements.forEach(el => observer.unobserve(el));
+    };
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form fields
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate form submission
+    setTimeout(() => {
+      setIsSubmitting(false);
+      toast({
+        title: "Success!",
+        description: "Your message has been sent. I'll get back to you soon!",
+      });
+      
+      // Reset form
+      setName('');
+      setEmail('');
+      setMessage('');
+    }, 1500);
+  };
+
+  return (
+    <section id="contact" className="bg-lightgray">
+      <div className="container-custom">
+        <div className="text-center mb-16 reveal">
+          <h2 className="section-title">Get In Touch</h2>
+          <p className="section-subtitle">
+            Have a project in mind or need data analysis services? Let's talk!
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div className="reveal">
+            <h3 className="text-2xl font-bold text-navy mb-6">Contact Information</h3>
+            <p className="text-darkgray/80 mb-8">
+              I'm interested in freelance or contract opportunities. If you have a project that needs data expertise, don't hesitate to reach out.
+            </p>
+
+            <div className="space-y-6">
+              <div className="flex items-center">
+                <div className="bg-teal/10 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                  <Mail className="h-5 w-5 text-teal" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-navy">Email</h4>
+                  <a href="mailto:contact@datainsight.com" className="text-darkgray/80 hover:text-teal transition-colors">
+                    contact@datainsight.com
+                  </a>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <div className="bg-teal/10 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                  <Linkedin className="h-5 w-5 text-teal" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-navy">LinkedIn</h4>
+                  <a href="#" className="text-darkgray/80 hover:text-teal transition-colors">
+                    linkedin.com/in/data-analyst
+                  </a>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <div className="bg-teal/10 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                  <Clock className="h-5 w-5 text-teal" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-navy">Response Time</h4>
+                  <p className="text-darkgray/80">I'll respond within 24 hours</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-lg shadow-md reveal">
+            <h3 className="text-2xl font-bold text-navy mb-6">Send Me a Message</h3>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-darkgray mb-1">
+                    Name
+                  </label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    className="w-full"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-darkgray mb-1">
+                    Email
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your email"
+                    className="w-full"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-darkgray mb-1">
+                    Message
+                  </label>
+                  <Textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Tell me about your project"
+                    className="w-full min-h-[120px]"
+                    required
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-teal hover:bg-teal/90 text-white"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Contact;
