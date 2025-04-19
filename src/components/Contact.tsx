@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Linkedin, Clock } from 'lucide-react';
+import { Mail, Linkedin, Clock, Phone } from 'lucide-react';
 
 const Contact = () => {
   const [name, setName] = useState('');
@@ -33,7 +32,6 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form fields
     if (!name.trim() || !email.trim() || !message.trim()) {
       toast({
         title: "Error",
@@ -43,7 +41,6 @@ const Contact = () => {
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast({
@@ -56,7 +53,6 @@ const Contact = () => {
 
     setIsSubmitting(true);
 
-    // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false);
       toast({
@@ -64,7 +60,6 @@ const Contact = () => {
         description: "Your message has been sent. I'll get back to you soon!",
       });
       
-      // Reset form
       setName('');
       setEmail('');
       setMessage('');
@@ -95,8 +90,20 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="font-semibold text-navy">Email</h4>
-                  <a href="mailto:contact@datainsight.com" className="text-darkgray/80 hover:text-teal transition-colors">
-                    contact@datainsight.com
+                  <a href="mailto:usamaodho2005@gmail.com" className="text-darkgray/80 hover:text-teal transition-colors">
+                    usamaodho2005@gmail.com
+                  </a>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <div className="bg-teal/10 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                  <Phone className="h-5 w-5 text-teal" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-navy">Phone</h4>
+                  <a href="tel:+923153490189" className="text-darkgray/80 hover:text-teal transition-colors">
+                    +92 315 349 0189
                   </a>
                 </div>
               </div>
