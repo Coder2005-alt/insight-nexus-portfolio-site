@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { Database, LineChart, Code, PresentationChart } from 'lucide-react';
+import { Database, LineChart, Code, BarChart } from 'lucide-react';
 
 const About = () => {
   useEffect(() => {
@@ -23,7 +23,7 @@ const About = () => {
   const skills = [
     { name: 'Python', icon: Code, color: 'bg-blue-100 text-blue-700' },
     { name: 'SQL', icon: Database, color: 'bg-orange-100 text-orange-700' },
-    { name: 'Power BI', icon: PresentationChart, color: 'bg-yellow-100 text-yellow-700' },
+    { name: 'Power BI', icon: BarChart, color: 'bg-yellow-100 text-yellow-700' },
     { name: 'Tableau', icon: LineChart, color: 'bg-green-100 text-green-700' }
   ];
 
