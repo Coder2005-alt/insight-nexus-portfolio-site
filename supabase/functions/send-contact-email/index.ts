@@ -26,9 +26,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing contact request from ${name} (${email})`);
 
-    // Send email to site owner
+    // Send email to site owner - using the verified Resend domain
     const ownerEmailResponse = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>",
+      from: "onboarding@resend.dev", // Using Resend's default domain which is already verified
       to: ["usamaodho2005@gmail.com"],
       subject: `New Contact Form Message from ${name}`,
       html: `
@@ -47,7 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the sender
     const senderEmailResponse = await resend.emails.send({
-      from: "Usama Odho <onboarding@resend.dev>",
+      from: "onboarding@resend.dev", // Using Resend's default domain which is already verified
       to: [email],
       subject: "Thank you for your message",
       html: `
