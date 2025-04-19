@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,11 +56,17 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-contact-email', {
+      console.log("Sending contact form data:", { name, email, message });
+      
+      const response = await supabase.functions.invoke('send-contact-email', {
         body: { name, email, message }
       });
+      
+      console.log("Contact form submission response:", response);
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to send message");
+      }
 
       toast({
         title: "Success!",
@@ -73,7 +80,7 @@ const Contact = () => {
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again later.",
+        description: error.message || "Failed to send message. Please try again later.",
         variant: "destructive",
       });
     } finally {

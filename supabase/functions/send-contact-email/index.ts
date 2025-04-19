@@ -24,6 +24,8 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message }: ContactRequest = await req.json();
 
+    console.log(`Processing contact request from ${name} (${email})`);
+
     // Send email to site owner
     const ownerEmailResponse = await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
@@ -36,6 +38,12 @@ const handler = async (req: Request): Promise<Response> => {
         <p>${message}</p>
       `,
     });
+
+    console.log("Owner email response:", JSON.stringify(ownerEmailResponse));
+
+    if (ownerEmailResponse.error) {
+      throw new Error(`Failed to send email to owner: ${ownerEmailResponse.error.message}`);
+    }
 
     // Send confirmation email to the sender
     const senderEmailResponse = await resend.emails.send({
@@ -50,15 +58,28 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Emails sent successfully:", { ownerEmailResponse, senderEmailResponse });
+    console.log("Sender email response:", JSON.stringify(senderEmailResponse));
 
-    return new Response(JSON.stringify({ success: true }), {
+    if (senderEmailResponse.error) {
+      throw new Error(`Failed to send confirmation email to sender: ${senderEmailResponse.error.message}`);
+    }
+
+    console.log("Emails sent successfully to both owner and sender");
+
+    return new Response(JSON.stringify({ 
+      success: true,
+      ownerEmail: ownerEmailResponse,
+      senderEmail: senderEmailResponse
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error sending emails:", error);
     return new Response(
-      JSON.stringify({ error: "Failed to send emails" }),
+      JSON.stringify({ 
+        error: "Failed to send emails", 
+        details: error.message || "Unknown error" 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
