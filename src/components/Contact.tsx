@@ -6,12 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Linkedin, Clock, Phone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const Contact = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,6 +35,7 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (!name.trim() || !email.trim() || !message.trim()) {
       toast({
@@ -65,7 +68,17 @@ const Contact = () => {
       console.log("Contact form submission response:", response);
 
       if (response.error) {
-        throw new Error(response.error.message || "Failed to send message");
+        throw new Error(
+          response.error.message || 
+          (typeof response.error === 'string' ? response.error : JSON.stringify(response.error)) || 
+          "Failed to send message"
+        );
+      }
+
+      const data = response.data;
+      
+      if (data.error) {
+        throw new Error(data.details || data.error || "Failed to send message");
       }
 
       toast({
@@ -73,11 +86,13 @@ const Contact = () => {
         description: "Your message has been sent. You'll receive a confirmation email shortly!",
       });
       
+      // Reset form
       setName('');
       setEmail('');
       setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
+      setError(error.message || "Failed to send message. Please try again later.");
       toast({
         title: "Error",
         description: error.message || "Failed to send message. Please try again later.",
@@ -97,6 +112,13 @@ const Contact = () => {
             Have a project in mind or need data analysis services? Let's talk!
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-6 mx-auto max-w-3xl">
+            <AlertTitle>Error sending message</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="reveal">

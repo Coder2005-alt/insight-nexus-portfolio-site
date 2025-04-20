@@ -26,7 +26,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing contact request from ${name} (${email})`);
 
+    // Validate incoming data
+    if (!name || !email || !message) {
+      throw new Error("Missing required fields: name, email, or message");
+    }
+
     // Send email to site owner - using the verified Resend domain
+    console.log("Attempting to send email to site owner...");
     const ownerEmailResponse = await resend.emails.send({
       from: "onboarding@resend.dev", // Using Resend's default domain which is already verified
       to: ["usamaodho2005@gmail.com"],
@@ -42,10 +48,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Owner email response:", JSON.stringify(ownerEmailResponse));
 
     if (ownerEmailResponse.error) {
-      throw new Error(`Failed to send email to owner: ${ownerEmailResponse.error.message}`);
+      console.error("Failed to send email to owner:", ownerEmailResponse.error);
+      throw new Error(`Failed to send email to owner: ${ownerEmailResponse.error.message || JSON.stringify(ownerEmailResponse.error)}`);
     }
 
     // Send confirmation email to the sender
+    console.log("Attempting to send confirmation email to sender...");
     const senderEmailResponse = await resend.emails.send({
       from: "onboarding@resend.dev", // Using Resend's default domain which is already verified
       to: [email],
@@ -61,7 +69,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sender email response:", JSON.stringify(senderEmailResponse));
 
     if (senderEmailResponse.error) {
-      throw new Error(`Failed to send confirmation email to sender: ${senderEmailResponse.error.message}`);
+      console.error("Failed to send confirmation email to sender:", senderEmailResponse.error);
+      throw new Error(`Failed to send confirmation email to sender: ${senderEmailResponse.error.message || JSON.stringify(senderEmailResponse.error)}`);
     }
 
     console.log("Emails sent successfully to both owner and sender");
@@ -78,7 +87,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         error: "Failed to send emails", 
-        details: error.message || "Unknown error" 
+        details: error.message || "Unknown error",
+        stack: error.stack || "No stack trace available"
       }),
       { 
         status: 500,
