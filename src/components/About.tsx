@@ -39,21 +39,29 @@ const About = () => {
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="reveal">
-            <h3 className="text-2xl font-bold text-navy mb-4">
-              Hi, I'm <span className="text-teal">Jane Doe</span>, a data analyst with <span className="text-teal">5 years</span> of experience
-            </h3>
-            <p className="text-darkgray mb-6">
-              I specialize in transforming complex data into clear, actionable insights that drive business decisions. With expertise in Python, SQL, Power BI, and Tableau, I help businesses unlock their potential through data analysis and visualization.
-            </p>
-            <p className="text-darkgray mb-6">
-              My approach combines technical expertise with business acumen to deliver solutions that not only answer your current questions but help you ask better ones. I believe that good data analysis is both an art and a science - requiring technical skill, creativity, and clear communication.
-            </p>
-            <p className="text-darkgray font-medium">
-              I help businesses unlock their potential through data analysis and visualization.
-            </p>
+            <img 
+              src="/placeholder.svg" 
+              alt="Profile" 
+              className="w-full h-auto rounded-lg shadow-lg"
+            />
           </div>
-
+          
           <div>
+            <div className="mb-8 reveal">
+              <h3 className="text-2xl font-bold text-navy mb-4">
+                Hi, I'm <span className="text-teal">Jane Doe</span>, a data analyst with <span className="text-teal">5 years</span> of experience
+              </h3>
+              <p className="text-darkgray mb-6">
+                I specialize in transforming complex data into clear, actionable insights that drive business decisions. With expertise in Python, SQL, Power BI, and Tableau, I help businesses unlock their potential through data analysis and visualization.
+              </p>
+              <p className="text-darkgray mb-6">
+                My approach combines technical expertise with business acumen to deliver solutions that not only answer your current questions but help you ask better ones. I believe that good data analysis is both an art and a science - requiring technical skill, creativity, and clear communication.
+              </p>
+              <p className="text-darkgray font-medium">
+                I help businesses unlock their potential through data analysis and visualization.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-6 reveal">
               {skills.map((skill, index) => (
                 <div 
