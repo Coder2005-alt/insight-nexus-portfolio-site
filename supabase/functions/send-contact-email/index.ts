@@ -2,7 +2,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Initialize the Resend client with the API key from environment variables
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+const resend = new Resend(resendApiKey);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,13 +24,72 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, message }: ContactRequest = await req.json();
+    // Validate that we have the API key
+    if (!resendApiKey) {
+      console.error("Missing RESEND_API_KEY environment variable");
+      return new Response(
+        JSON.stringify({ 
+          error: "Server configuration error", 
+          details: "Missing API key"
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Parse the JSON body
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      console.error("Error parsing request body:", error);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid request", 
+          details: "Could not parse request body"
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { name, email, message } = requestData as ContactRequest;
 
     console.log(`Processing contact request from ${name} (${email})`);
 
     // Validate incoming data
     if (!name || !email || !message) {
-      throw new Error("Missing required fields: name, email, or message");
+      console.error("Missing required fields:", { name, email, messageLength: message?.length });
+      return new Response(
+        JSON.stringify({ 
+          error: "Missing required data", 
+          details: "Name, email, and message are required"
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.error("Invalid email format:", email);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid data", 
+          details: "Please provide a valid email address"
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Send email to site owner - using the verified Resend domain
@@ -49,7 +110,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (ownerEmailResponse.error) {
       console.error("Failed to send email to owner:", ownerEmailResponse.error);
-      throw new Error(`Failed to send email to owner: ${ownerEmailResponse.error.message || JSON.stringify(ownerEmailResponse.error)}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "Email sending failed", 
+          details: `Failed to send email to owner: ${ownerEmailResponse.error.message || JSON.stringify(ownerEmailResponse.error)}`
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Send confirmation email to the sender
@@ -70,7 +140,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (senderEmailResponse.error) {
       console.error("Failed to send confirmation email to sender:", senderEmailResponse.error);
-      throw new Error(`Failed to send confirmation email to sender: ${senderEmailResponse.error.message || JSON.stringify(senderEmailResponse.error)}`);
+      // We've already sent the owner email, so we'll just log this error but still return success
+      console.warn("Note: Owner notification was sent successfully, but confirmation email failed");
+      
+      return new Response(JSON.stringify({ 
+        success: true,
+        partialSuccess: true,
+        ownerEmail: ownerEmailResponse,
+        senderEmailError: senderEmailResponse.error,
+        message: "Your message was received but the confirmation email could not be sent."
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log("Emails sent successfully to both owner and sender");
@@ -83,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error sending emails:", error);
+    console.error("Unexpected error sending emails:", error);
     return new Response(
       JSON.stringify({ 
         error: "Failed to send emails", 

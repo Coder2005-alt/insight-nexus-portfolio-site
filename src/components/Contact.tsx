@@ -14,6 +14,7 @@ const Contact = () => {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,9 +34,22 @@ const Contact = () => {
     };
   }, []);
 
+  const resetForm = () => {
+    setName('');
+    setEmail('');
+    setMessage('');
+    setSubmitSuccess(true);
+    
+    // Reset success message after 5 seconds
+    setTimeout(() => {
+      setSubmitSuccess(false);
+    }, 5000);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitSuccess(false);
     
     if (!name.trim() || !email.trim() || !message.trim()) {
       toast({
@@ -67,6 +81,7 @@ const Contact = () => {
       
       console.log("Contact form submission response:", response);
 
+      // Check for HTTP-level errors (e.g., 500, 404, etc.)
       if (response.error) {
         throw new Error(
           response.error.message || 
@@ -75,21 +90,30 @@ const Contact = () => {
         );
       }
 
+      // Check for application-level errors in the response data
       const data = response.data;
       
-      if (data.error) {
+      if (data && data.error) {
         throw new Error(data.details || data.error || "Failed to send message");
       }
 
+      // Handle partial success (owner email sent but confirmation failed)
+      if (data && data.partialSuccess) {
+        toast({
+          title: "Message Received",
+          description: "Your message was sent, but the confirmation email could not be delivered. Please check your email address.",
+        });
+        resetForm();
+        return;
+      }
+
+      // Success!
       toast({
         title: "Success!",
         description: "Your message has been sent. You'll receive a confirmation email shortly!",
       });
       
-      // Reset form
-      setName('');
-      setEmail('');
-      setMessage('');
+      resetForm();
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error.message || "Failed to send message. Please try again later.");
@@ -117,6 +141,15 @@ const Contact = () => {
           <Alert variant="destructive" className="mb-6 mx-auto max-w-3xl">
             <AlertTitle>Error sending message</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {submitSuccess && (
+          <Alert className="mb-6 mx-auto max-w-3xl bg-green-50 border-green-200">
+            <AlertTitle className="text-green-800">Message Sent Successfully</AlertTitle>
+            <AlertDescription className="text-green-700">
+              Thank you for your message! I'll get back to you soon.
+            </AlertDescription>
           </Alert>
         )}
 
