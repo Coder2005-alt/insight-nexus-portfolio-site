@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ArrowUpRight } from 'lucide-react';
+
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 const projects = [
   {
@@ -34,9 +34,23 @@ const projects = [
     tools: ["Python", "Tableau"],
     outcome: "Increased campaign efficiency by 12%",
   },
+  // Example additional projects for demonstration (add more here)
+  {
+    title: "E-commerce Dashboard",
+    description: "Realtime analytics for e-commerce KPIs with custom report builders.",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    tools: ["SQL", "Tableau"],
+    outcome: "Raised conversion by 6%",
+  },
+  {
+    title: "HR Attrition Report",
+    description: "Automated HR attrition and retention analysis using Python.",
+    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    tools: ["Python", "Pandas"],
+    outcome: "Improved team stability by 9%",
+  },
 ];
 
-// The available filters and their display names
 const filterOptions = [
   { label: "All", value: "All" },
   { label: "Python", value: "Python" },
@@ -44,47 +58,25 @@ const filterOptions = [
   { label: "SQL", value: "SQL" },
 ];
 
-const moreProjectsUrl = "https://your-portfolio.com/projects"; // Update with your actual projects page
-
-const Projects = () => {
-  // Animation for reveal effects
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
-      });
-    }, { threshold: 0.1 });
-
-    const revealElements = document.querySelectorAll('.reveal');
-    revealElements.forEach(el => observer.observe(el));
-
-    return () => {
-      revealElements.forEach(el => observer.unobserve(el));
-    };
-  }, []);
-
-  const [filter, setFilter] = useState<string>("All");
+const AllProjects = () => {
+  const [filter, setFilter] = React.useState<string>("All");
   const navigate = useNavigate();
 
-  // Filter the projects according to the selected filter
   const filteredProjects = projects.filter(project =>
-    filter === "All" ? true : project.tools.map(t => t.toLowerCase()).includes(filter.toLowerCase())
+    filter === "All"
+      ? true
+      : project.tools.map(t => t.toLowerCase()).includes(filter.toLowerCase())
   );
 
   return (
-    <section id="projects" className="bg-white">
+    <section className="bg-white min-h-screen pb-16 pt-12">
       <div className="container-custom">
-        <div className="text-center mb-8 reveal">
-          <h2 className="section-title">Featured Projects</h2>
-          <p className="section-subtitle">
-            A showcase of my work in data analysis and visualization
-          </p>
+        <div className="text-center mb-8">
+          <h2 className="section-title">All Projects</h2>
+          <p className="section-subtitle">Browse my complete portfolio of data projects across analytics and BI.</p>
         </div>
-        
-        {/* Filter buttons */}
-        <div className="flex justify-center gap-2 mb-12 reveal">
+        {/* Filters */}
+        <div className="flex justify-center gap-2 mb-10">
           {filterOptions.map(option => (
             <Button
               key={option.value}
@@ -97,57 +89,39 @@ const Projects = () => {
             </Button>
           ))}
         </div>
-        
         <div className="grid md:grid-cols-2 gap-10">
-          {filteredProjects.map((project, index) => (
-            <Card key={index} className="overflow-hidden border-none shadow-lg reveal" style={{ animationDelay: `${index * 0.1}s` }}>
+          {filteredProjects.map((project, idx) => (
+            <Card key={idx} className="overflow-hidden border-none shadow-lg" style={{ animationDelay: `${idx * 0.08}s` }}>
               <div className="relative h-60 w-full overflow-hidden">
                 <img 
-                  src={project.image} 
-                  alt={project.title} 
+                  src={project.image}
+                  alt={project.title}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
               </div>
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-navy mb-2">{project.title}</h3>
                 <p className="text-darkgray/80 mb-4">{project.description}</p>
-                
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {project.tools.map((tool) => (
+                  {project.tools.map(tool => (
                     <Badge key={tool} className="bg-navy/10 text-navy hover:bg-navy/20">
                       {tool}
                     </Badge>
                   ))}
                 </div>
-                
                 <div className="flex items-center justify-between">
                   <p className="text-teal font-medium">
                     <span className="font-bold">Outcome:</span> {project.outcome}
                   </p>
-                  <Button variant="ghost" size="sm" className="text-navy hover:text-teal">
-                    <ArrowUpRight className="h-4 w-4 mr-1" />
-                    Details
-                  </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {/* More Projects button */}
-        <div className="flex justify-center mt-12 reveal">
-          <Button
-            variant="default"
-            size="lg"
-            className="bg-navy text-white hover:bg-teal transition-colors"
-            onClick={() => navigate("/projects")}
-          >
-            View All Projects
-            <svg className="ml-2" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-              <polyline points="15 3 21 3 21 9"/>
-              <line x1="10" x2="21" y1="14" y2="3"/>
-            </svg>
+        <div className="flex justify-center mt-12">
+          <Button onClick={() => navigate("/")} variant="outline" size="lg">
+            Back to Home
+            <ArrowRight className="ml-2" />
           </Button>
         </div>
       </div>
@@ -155,4 +129,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default AllProjects;
