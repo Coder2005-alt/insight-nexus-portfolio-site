@@ -1,4 +1,5 @@
 
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +60,7 @@ const filterOptions = [
 ];
 
 const AllProjects = () => {
-  const [filter, setFilter] = React.useState<string>("All");
+  const [filter, setFilter] = useState<string>("All");
   const navigate = useNavigate();
 
   const filteredProjects = projects.filter(project =>
